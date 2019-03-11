@@ -12,13 +12,13 @@ $(document).ready(function(){
   })
 });
 
-var rows = 7;
-var cols = 1;
-var grid = [];
-//var divs = $(".panel-tablero");
+$(".btn-reinicio").click(function(){
+  _executeDestroy();
+})
 
-//$(document).ready(function(){
-//  $("div[name^='col']").css("background-color", "yellow");});
+var rows = 7;
+var cols = 7;
+var grid = [];
 
 function candy(r,c,obj,src) {
   return {
@@ -42,8 +42,6 @@ function pickRandomCandy() {
   return candyType[pickInt];
 }
 
-//Columna 1
-
 for (var r = 0; r < rows; r++) {
   grid[r] = [];
 
@@ -52,10 +50,10 @@ for (var r = 0; r < rows; r++) {
   }
 }
 
-var width = $(".col-1").width();
-var height = $(".col-1").height();
-var cellWidth = width / (cols+1);
-var cellHeight = height / (rows+1);
+var width = $("#tablero").width();
+var height = $("#tablero").height();
+var cellWidth = width / (cols-1);
+var cellHeight = height / rows;
 var marginWidth = cellWidth / cols;
 var marginHeight = cellHeight / rows;
 
@@ -64,193 +62,13 @@ for (var r = 0; r < rows; r++)
     for (var c =0; c< cols; c++) {
       var cell = $("<img class='candy' id='candy_"+
       r+"_"+c+"' r='"+r+"' c='"+c+"'ondrop='_onDrop(event)' ondragover='_onDragOverEnabled(event)'src='"+grid[r][c].src+"' style='padding-right:20px;width:"+
-                 (cellWidth-20)+"px;height:"+cellHeight+"px;position:initial;top:"+
+                 (cellWidth-20)+"px;height:"+cellHeight+"px;top:"+
                  r*cellHeight+"px;left:"+(c*cellWidth+marginWidth)+"px'/>");
       cell.attr("ondragstart","_ondragstart(event)");
-      $(".col-1").append(cell);
+      $("#tablero").append(cell);
       grid[r][c].o = cell;
     }
    }
-
-//Columna 2
-
-   for (var r = 0; r < rows; r++) {
-     grid[r] = [];
-
-     for (var c = 0; c < cols; c++) {
-       grid[r][c] = new candy(r,c,null,pickRandomCandy());
-     }
-   }
-
-   var width = $(".col-2").width();
-   var height = $(".col-2").height();
-   var cellWidth = width / (cols+1);
-   var cellHeight = height / (rows+1);
-   var marginWidth = cellWidth / cols;
-   var marginHeight = cellHeight / rows;
-
-   for (var r = 0; r < rows; r++)
-     {
-       for (var c =0; c< cols; c++) {
-         var cell = $("<img class='candy' id='candy_"+
-         r+"_"+c+"' r='"+r+"' c='"+c+"'ondrop='_onDrop(event)' ondragover='_onDragOverEnabled(event)'src='"+grid[r][c].src+"' style='padding-right:20px;width:"+
-                    (cellWidth-20)+"px;height:"+cellHeight+"px;position:initial;top:"+
-                    r*cellHeight+"px;left:"+(c*cellWidth+marginWidth)+"px'/>");
-         cell.attr("ondragstart","_ondragstart(event)");
-         $(".col-2").append(cell);
-         grid[r][c].o = cell;
-       }
-      }
-
-      //Columna 3
-
-      for (var r = 0; r < rows; r++) {
-        grid[r] = [];
-
-        for (var c = 0; c < cols; c++) {
-          grid[r][c] = new candy(r,c,null,pickRandomCandy());
-        }
-      }
-
-      var width = $(".col-3").width();
-      var height = $(".col-3").height();
-      var cellWidth = width / (cols+1);
-      var cellHeight = height / (rows+1);
-      var marginWidth = cellWidth / cols;
-      var marginHeight = cellHeight / rows;
-
-      for (var r = 0; r < rows; r++)
-        {
-          for (var c =0; c< cols; c++) {
-            var cell = $("<img class='candy' id='candy_"+
-            r+"_"+c+"' r='"+r+"' c='"+c+"'ondrop='_onDrop(event)' ondragover='_onDragOverEnabled(event)'src='"+grid[r][c].src+"' style='padding-right:20px;width:"+
-                       (cellWidth-20)+"px;height:"+cellHeight+"px;position:initial;top:"+
-                       r*cellHeight+"px;left:"+(c*cellWidth+marginWidth)+"px'/>");
-            cell.attr("ondragstart","_ondragstart(event)");
-            $(".col-3").append(cell);
-            grid[r][c].o = cell;
-          }
-         }
-
-         //Columna 4
-
-         for (var r = 0; r < rows; r++) {
-           grid[r] = [];
-
-           for (var c = 0; c < cols; c++) {
-             grid[r][c] = new candy(r,c,null,pickRandomCandy());
-           }
-         }
-
-         var width = $(".col-4").width();
-         var height = $(".col-4").height();
-         var cellWidth = width / (cols+1);
-         var cellHeight = height / (rows+1);
-         var marginWidth = cellWidth / cols;
-         var marginHeight = cellHeight / rows;
-
-         for (var r = 0; r < rows; r++)
-           {
-             for (var c =0; c< cols; c++) {
-               var cell = $("<img class='candy' id='candy_"+
-               r+"_"+c+"' r='"+r+"' c='"+c+"'ondrop='_onDrop(event)' ondragover='_onDragOverEnabled(event)'src='"+grid[r][c].src+"' style='padding-right:20px;width:"+
-                          (cellWidth-20)+"px;height:"+cellHeight+"px;position:initial;top:"+
-                          r*cellHeight+"px;left:"+(c*cellWidth+marginWidth)+"px'/>");
-               cell.attr("ondragstart","_ondragstart(event)");
-               $(".col-4").append(cell);
-               grid[r][c].o = cell;
-             }
-            }
-
-            //Columna 5
-
-            for (var r = 0; r < rows; r++) {
-              grid[r] = [];
-
-              for (var c = 0; c < cols; c++) {
-                grid[r][c] = new candy(r,c,null,pickRandomCandy());
-              }
-            }
-
-            var width = $(".col-5").width();
-            var height = $(".col-5").height();
-            var cellWidth = width / (cols+1);
-            var cellHeight = height / (rows+1);
-            var marginWidth = cellWidth / cols;
-            var marginHeight = cellHeight / rows;
-
-            for (var r = 0; r < rows; r++)
-              {
-                for (var c =0; c< cols; c++) {
-                  var cell = $("<img class='candy' id='candy_"+
-                  r+"_"+c+"' r='"+r+"' c='"+c+"'ondrop='_onDrop(event)' ondragover='_onDragOverEnabled(event)'src='"+grid[r][c].src+"' style='padding-right:20px;width:"+
-                             (cellWidth-20)+"px;height:"+cellHeight+"px;position:initial;top:"+
-                             r*cellHeight+"px;left:"+(c*cellWidth+marginWidth)+"px'/>");
-                  cell.attr("ondragstart","_ondragstart(event)");
-                  $(".col-5").append(cell);
-                  grid[r][c].o = cell;
-                }
-               }
-
-               //Columna 6
-
-               for (var r = 0; r < rows; r++) {
-                 grid[r] = [];
-
-                 for (var c = 0; c < cols; c++) {
-                   grid[r][c] = new candy(r,c,null,pickRandomCandy());
-                 }
-               }
-
-               var width = $(".col-6").width();
-               var height = $(".col-6").height();
-               var cellWidth = width / (cols+1);
-               var cellHeight = height / (rows+1);
-               var marginWidth = cellWidth / cols;
-               var marginHeight = cellHeight / rows;
-
-               for (var r = 0; r < rows; r++)
-                 {
-                   for (var c =0; c< cols; c++) {
-                     var cell = $("<img class='candy' id='candy_"+
-                     r+"_"+c+"' r='"+r+"' c='"+c+"'ondrop='_onDrop(event)' ondragover='_onDragOverEnabled(event)'src='"+grid[r][c].src+"' style='padding-right:20px;width:"+
-                                (cellWidth-20)+"px;height:"+cellHeight+"px;position:initial;top:"+
-                                r*cellHeight+"px;left:"+(c*cellWidth+marginWidth)+"px'/>");
-                     cell.attr("ondragstart","_ondragstart(event)");
-                     $(".col-6").append(cell);
-                     grid[r][c].o = cell;
-                   }
-                  }
-
-                  //Columna 7
-
-                  for (var r = 0; r < rows; r++) {
-                    grid[r] = [];
-
-                    for (var c = 0; c < cols; c++) {
-                      grid[r][c] = new candy(r,c,null,pickRandomCandy());
-                    }
-                  }
-
-                  var width = $(".col-7").width();
-                  var height = $(".col-7").height();
-                  var cellWidth = width / (cols+1);
-                  var cellHeight = height / (rows+1);
-                  var marginWidth = cellWidth / cols;
-                  var marginHeight = cellHeight / rows;
-
-                  for (var r = 0; r < rows; r++)
-                    {
-                      for (var c =0; c< cols; c++) {
-                        var cell = $("<img class='candy' id='candy_"+
-                        r+"_"+c+"' r='"+r+"' c='"+c+"'ondrop='_onDrop(event)' ondragover='_onDragOverEnabled(event)'src='"+grid[r][c].src+"' style='padding-right:20px;width:"+
-                                   (cellWidth-20)+"px;height:"+cellHeight+"px;position:initial;top:"+
-                                   r*cellHeight+"px;left:"+(c*cellWidth+marginWidth)+"px'/>");
-                        cell.attr("ondragstart","_ondragstart(event)");
-                        $(".col-7").append(cell);
-                        grid[r][c].o = cell;
-                      }
-                     }
 
 function _ondragstart(a) {
  a.dataTransfer.setData("text/plain", a.target.id);
@@ -289,17 +107,19 @@ function _onDrop(e) {
   grid[dr][dc].src = tmp;
   grid[dr][dc].o.attr("src",grid[dr][dc].src);
 
-
+  console.log("Seeee");
   _checkAndDestroy();
+  _executeDestroy();
 }
 
 function _checkAndDestroy(){
-
+console.log("sii");
   for (var r = 0; r < rows; r++) {
     var prevCell = null;
     var figureLen = 0;
     var figureStart = null;
     var figureStop = null;
+    var validFigures = 0;
 
     for (var c = 0; c < cols; c++) {
 
@@ -328,7 +148,7 @@ function _checkAndDestroy(){
           continue;
         }else {
           figureLen+=1;
-          if (figureLen == 3) {
+          if (figureLen <= 3) {
             validFigures+=1;
             figureStop = c;
             console.log("Combo from " + figureStart + " to " + figureStop + "!");
@@ -341,10 +161,94 @@ function _checkAndDestroy(){
             figureStop = null;
             figureLen = 1;
             continue;
-
+            _executeDestroy();
           }
         }
       }
     }
   }
 }
+
+function _executeDestroy()
+             { console.log("hehehehe");
+                  for (var r=0;r<rows-1;r++)
+                      for (var c=0;c<cols-1;c++)
+                          if (grid[r][c].isInCombo)
+                          {
+                              grid[r][c].o.animate({
+                                  opacity:0
+                              },500);
+                          }
+
+                 $(":animated").promise().done(function() {
+                      _executeDestroyMemory();
+                });
+             }
+
+             function _executeDestroyMemory() {
+
+                  for (var r=0;r<rows-1;r++)
+                  {
+                      for (var c=0;c<cols-1;c++)
+                      {
+                          if (grid[r][c].isInCombo)
+                          {
+                              grid[r][c].o.attr("src","")
+
+                              grid[r][c].isInCombo=false;
+
+                              for (var sr=r;sr>=0;sr--)
+                              {
+                                  if (sr==0) break;
+                                  if (grid[sr-1][c].locked)
+                                      break; // cannot shift. my top is locked
+
+                                      // shift cell
+                                      var tmp = grid[sr][c].src;
+                                        grid[sr][c].src=grid[sr-1][c].src;
+                                    grid[sr-1][c].src=tmp;
+
+                              }
+                          }
+                      }
+                 }
+
+                     console.log("End of movement");
+
+                       //redrawing the grid
+                       // and setup respaw
+
+                       //Reset all cell
+                    for (var r=0;r<rows-1;r++)
+                     {    for (var c = 0;c<cols-1;c++)
+                         {
+                             grid[r][c].o.attr("src",grid[r][c].src);
+                             grid[r][c].o.css("opacity","1");
+                             grid[r][c].isInCombo=false;
+                             if (grid[r][c].src==null)
+                                 grid[r][c].respawn=true;
+                              // if respawn is needed
+                              if (grid[r][c].respawn==true)
+                             {
+                                 grid[r][c].o.off("ondragover");
+                                 grid[r][c].o.off("ondrop");
+                                 grid[r][c].o.off("ondragstart");
+
+                                 grid[r][c].respawn=false; // respawned!
+                                 console.log("Respawning " + r+ "," + c);
+                                 grid[r][c].src=pickRandomCandy();
+                                 grid[r][c].locked=false;
+                                 grid[r][c].o.attr("src",grid[r][c].src);
+                                 grid[r][c].o.attr("ondragstart","_ondragstart(event)");
+                                 grid[r][c].o.attr("ondrop","_onDrop(event)");
+                                 grid[r][c].o.attr("ondragover","_onDragOverEnabled(event)");
+
+                             }
+                         }
+                     }
+
+                     console.log("jewels resetted and rewpawned");
+
+                     // check for other valid figures
+                     _checkAndDestroy();
+             }
