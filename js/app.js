@@ -1,254 +1,404 @@
-$(document).ready(function(){
-  $(function(){
-    setInterval(function(){
-      var color = $(".main-titulo").css("color");
-      if (color == "rgb(220, 255, 14)") {
-        $(".main-titulo").css("color","white");
-      }
-      else {
-        $(".main-titulo").css("color","rgb(220, 255, 14)");
-      }
-    },800);
-  })
+$(document).ready(function () {
+
+  $(".fin").hide();
+
+  var $game = $('#tablero');
+  var $ui = $('.data-info');
+
+  $('.btn-reinicio').on('click', function(event) {
+		event.preventDefault();
+
+    if($(".btn-reinicio").text().match("Iniciar")) {
+      var value = 7;
+      newGame = new Game();
+      newGame.init(value, $game, $ui);
+
+      $(".btn-reinicio").text("Reiniciar");
+
+    }else if ($(".btn-reinicio").text().match("Reiniciar")) {
+      location.reload();
+    }
+
+	});
+
+    $(function () {
+        setInterval(function () {
+            var color = $(".main-titulo").css("color");
+            if (color == "rgb(220, 255, 14)") {
+                $(".main-titulo").css("color", "white");
+            } else {
+                $(".main-titulo").css("color", "rgb(220, 255, 14)");
+            }
+        }, 800);
+    })
+
+
 });
 
-$(".btn-reinicio").click(function(){
-  _executeDestroy();
-})
+var newGame;
 
-var rows = 7;
-var cols = 7;
-var grid = [];
+var Game = function() {
 
-function candy(r,c,obj,src) {
-  return {
-    r: r,
-    c: c,
-    src:src,
-    locked:false,
-    isInCombo:false,
-    o:obj
+  this.init = function(size, base, ui) {
+    $( ".row" ).removeClass();
+
+    this.base = base;
+    this.ui = ui;
+    this.originalSize = size;
+    this.size = this.originalSize * this.originalSize;
+    this.caseHeight = base.height() / this.originalSize;
+    this.level = [];
+    this.typesOfCandys = 3;
+    this.fillEnd = true;
+    this.switchEnd = true;
+    this.playerCanControl = false;
+    this.populateLevel();
+    this.drawNewLevel();
+    this.score = 0;
+    this.move = 0;
+
+    setTimeout($.proxy(this.checkLines, this), 500);
   };
-}
 
-var candyType = [];
-candyType[0] = "image/1.png";
-candyType[1] = "image/2.png";
-candyType[2] = "image/3.png";
-candyType[3] = "image/4.png";
-
-function pickRandomCandy() {
-  var pickInt = Math.floor((Math.random()*4));
-  return candyType[pickInt];
-}
-
-for (var r = 0; r < rows; r++) {
-  grid[r] = [];
-
-  for (var c = 0; c < cols; c++) {
-    grid[r][c] = new candy(r,c,null,pickRandomCandy());
-  }
-}
-
-var width = $("#tablero").width();
-var height = $("#tablero").height();
-var cellWidth = width / (cols-1);
-var cellHeight = height / rows;
-var marginWidth = cellWidth / cols;
-var marginHeight = cellHeight / rows;
-
-for (var r = 0; r < rows; r++)
-  {
-    for (var c =0; c< cols; c++) {
-      var cell = $("<img class='candy' id='candy_"+
-      r+"_"+c+"' r='"+r+"' c='"+c+"'ondrop='_onDrop(event)' ondragover='_onDragOverEnabled(event)'src='"+grid[r][c].src+"' style='padding-right:20px;width:"+
-                 (cellWidth-20)+"px;height:"+cellHeight+"px;top:"+
-                 r*cellHeight+"px;left:"+(c*cellWidth+marginWidth)+"px'/>");
-      cell.attr("ondragstart","_ondragstart(event)");
-      $("#tablero").append(cell);
-      grid[r][c].o = cell;
+  this.releaseGameControl = function(play) {
+    if (play) {
+      this.playerCanControl = true;
+    }else {
+      this.playerCanControl = false;
     }
-   }
+  };
 
-function _ondragstart(a) {
- a.dataTransfer.setData("text/plain", a.target.id);
-}
+  this.bindDraggableEvent = function() {
+    var that = this;
+    var position;
 
-function _onDragOverEnabled(e) {
-  e.preventDefault();
-  console.log(e.target.id);
-}
+    this.base.hammer().on('dragleft dragright dragup dragdown', '.row', function(event) {
 
-function _onDrop(e) {
-  var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-  if (isFirefox) {
-    console.log("firefox compatibility");
-    e.preventDefault();
-  }
 
-  var src = e.dataTransfer.getData("text");
-  var sr = src.split("_")[1];
-  var sc = src.split("_")[2];
+      position = +$(this).attr('data-id');
 
-  var dst = e.target.id;
-  var dr = dst.split("_")[1];
-  var dc = dst.split("_")[2];
+      if (position !== undefined) {
+        that.testMove(position, event.type);
+        return;
+      }
+    });
+  };
 
-  var ddx = Math.abs(parseInt(sr)-parseInt(dr));
-  var ddy = Math.abs(parseInt(sc)-parseInt(dc));
-  if (ddx > 1 || ddy > 1){
-    console.log("Ni madre perro! distancia > 1");
-    return;
-  }
+  this.testMove = function(position, direction) {
+    switch(direction) {
+      case "dragleft":
+         if (position % this.originalSize !== 0) {
+           this.swipeCandys(this.base.find('.row[data-id='+position+']'), position, this.base.find('.row[data-id='+(position - 1)+']'), position - 1);
 
-  var tmp = grid[sr][sc].src;
-  grid[sr][sc].src = grid[dr][dc].src;
-  grid[sr][sc].o.attr("src",grid[sr][sc].src);
-  grid[dr][dc].src = tmp;
-  grid[dr][dc].o.attr("src",grid[dr][dc].src);
+         }
+      break;
 
-  console.log("Seeee");
-  _checkAndDestroy();
-  _executeDestroy();
-}
+      case "dragright":
+         if (position % this.originalSize !== this.originalSize - 1) {
+           this.swipeCandys(this.base.find('.row[data-id='+position+']'), position, this.base.find('.row[data-id='+(position + 1)+']'), position + 1);
 
-function _checkAndDestroy(){
-console.log("sii");
-  for (var r = 0; r < rows; r++) {
-    var prevCell = null;
-    var figureLen = 0;
-    var figureStart = null;
-    var figureStop = null;
-    var validFigures = 0;
+         }
+      break;
 
-    for (var c = 0; c < cols; c++) {
+      case "dragup":
+          this.swipeCandys(this.base.find('.row[data-id='+position+']'), position, this.base.find('.row[data-id='+(position - this.originalSize)+']'), position - this.originalSize);
 
-      if (grid[r][c].locked || grid[r][c].isInCombo) {
-        figureStart = null;
-        figureStop = null;
-        prevCell = null;
-        figureLen = 1;
-        continue;
+      break;
+
+      case "dragdown":
+          this.swipeCandys(this.base.find('.row[data-id='+position+']'), position, this.base.find('.row[data-id='+(position + this.originalSize)+']'), position + this.originalSize);
+
+      break;
+    }
+  };
+
+  this.swipeCandys = function(a, aID, b, bID) {
+
+    if (this.switchEnd && a !== undefined && b !== undefined && aID >= 0 && bID >= 0 && aID <= this.size && bID <= this.size) {
+
+      var that = this;
+      var aTop = a.css('top');
+      var aLeft = a.css('left');
+      var bTop = b.css('top');
+      var bLeft = b.css('left');
+      var aType = this.level[aID];
+      var bType = this.level[bID];
+
+      this.switchEnd = false;
+
+      this.level[aID] = bType;
+      this.level[bID] = aType;
+
+      this.move = this.move + 1;
+      $('#movimientos').text(this.move);
+
+      a.attr('data-id', bID).animate({
+        top: bTop,
+        left: bLeft
+      },250);
+
+      b.attr('data-id', aID).animate({
+        top: aTop,
+        left: aLeft
+      },250, function() {
+        that.switchEnd = true;
+        that.checkLines();
+      });
+    }
+  };
+
+  this.populateLevel = function() {
+    var i;
+    for (i = 0; i < this.size; i++) {
+
+      this.level[i] = Math.round(Math.random() * this.typesOfCandys +1);
+    }
+  };
+
+  this.drawNewLevel = function() {
+    var i;
+    var row = $(document.createElement('div'));
+    var lines = -1;
+
+    $('.row').remove();
+
+    for (i = 0; i < this.size; i++){
+
+      if (i % this.originalSize === 0) {
+        lines++;
       }
 
-      if (prevCell == null) {
-        prevCell = grid[r][c].src;
-        figureStart = c;
-        figureLen = 1;
-        figureStop = null;
-        continue;
-      }else {
-        var curCell = grid[r][c].src;
+      row.css({
+        top: lines * this.caseHeight,
+        left: i % this.originalSize * this.caseHeight,
+        height: this.caseHeight,
+        width: this.caseHeight
+      }).attr({
+        "class": 'type-' + this.level[i] + ' row',
+        "data-id": i
+      });
 
-        if (!(prevCell == curCell)) {
-          prevCell = grid[r][c].src;
-          figureStart = c;
-          figureLen = 1;
-          figureStop = null;
-          continue;
-        }else {
-          figureLen+=1;
-          if (figureLen <= 3) {
-            validFigures+=1;
-            figureStop = c;
-            console.log("Combo from " + figureStart + " to " + figureStop + "!");
-            for (var ci = figureStart; ci <= figureStop; ci++) {
-              grid[r][ci].isInCombo = true;
-              grid[r][ci].src = null;
-            }
-            prevCell = null;
-            figureStart = null;
-            figureStop = null;
-            figureLen = 1;
-            continue;
-            _executeDestroy();
-          }
+      this.base.append(row.clone());
+    }
+
+    this.lines = lines + 1;
+    this.itemByLine = this.size / this.lines;
+
+    this.bindDraggableEvent();
+    this.releaseGameControl(true);
+  };
+
+  this.checkLines = function() {
+    var k;
+    var counter = 0;
+
+    this.base.find('.row').removeClass('.glow');
+
+    for (var k = 0; k < this.size; k++) {
+      counter = counter + this.checkCandyAround(this.level[k], k);
+    }
+
+    if (counter === this.size) {
+      this.releaseGameControl(true);
+      return true;
+
+
+    }else {
+      this.releaseGameControl(false);
+      return false;
+
+    }
+  };
+
+  this.checkCandyAround = function(candyType, position) {
+    var flag = false;
+
+    if (this.level[position - 1] === candyType && this.level[position +1] === candyType && (position + 1) % this.lines !== 0 && position % this.lines) {
+      this.removeClearedCandyToLevel([position, position - 1, position + 1]);
+    }else {
+      flag = true;
+    }
+
+    if (this.level[position - this.itemByLine] === candyType && this.level[position + this.itemByLine] === candyType) {
+      this.removeClearedCandyToLevel([position - this.itemByLine, position, position + this.itemByLine]);
+    }else {
+      flag = true;
+    }
+
+    if (flag) {
+      return 1;
+    }else {
+      return 0;
+    }
+  };
+
+  this.removeClearedCandyToLevel = function(candyToRemove) {
+    var i;
+
+    for (i = 0; i < candyToRemove.length; i++) {
+      this.level[candyToRemove[i]] = 0;
+      this.animateRemoveCandy(candyToRemove[i]);
+    }
+
+
+  };
+
+  this.animateRemoveCandy = function(position) {
+    var that = this;
+
+    var difference = this.caseHeight / 2;
+
+    this.base.find('.row[data-id='+position+']')
+    .attr('data-id', false)
+    .addClass('glow').animate({
+      marginTop: difference,
+      marginLeft: difference,
+      height: 0,
+      width: 0
+    }, 500, function(){
+      $(this).remove();
+      that.scoreUpdate(100);
+
+    });
+
+    if (that.fillEnd) {
+      that.fillHoles();
+    }
+  };
+
+  this.moveCandy = function(position, line, colPosition, destination) {
+    var that = this;
+
+    this.base.find('.row[data-id='+position+']').animate({
+      top: Math.abs(line * that.caseHeight)
+    }, 100, "swing").attr('data-id', destination);
+
+    this.level[destination] = this.level[position];
+    this.level[position] = 0;
+
+    if(line === 1) {
+      this.createNewRandomCandy(colPosition);
+    }
+  };
+
+
+  this.createNewRandomCandy = function(colPosition) {
+
+    var that = this;
+    var candy = $(document.createElement('div'));
+
+    this.level[colPosition] = Math.round(Math.random() * this.typesOfCandys + 1);
+
+    candy.addClass('type-' + this.level[colPosition] +' row').css({
+      top: -this.caseHeight,
+      left: colPosition * this.caseHeight,
+      height: this.caseHeight,
+      width: this.caseHeight,
+      opacity: 0
+    }).attr({
+      "data-id": colPosition
+    });
+
+    candy.appendTo(this.base);
+
+    candy.animate({
+      top: 0,
+      opacity: 1
+    },100);
+
+    this.bindDraggableEvent();
+  };
+
+  this.fillHoles = function() {
+
+    var i;
+    var counter = 0;
+
+    this.releaseGameControl(false);
+
+    this.fillEnd = false;
+
+    for (var i = 0; i < this.level.length; i++) {
+
+      var under = i + this.originalSize;
+      var lignePosition = Math.floor(under / this.originalSize);
+      var colPosition = under - Math.floor(lignePosition * this.originalSize);
+
+      if (this.level[under] === 0 && this.level[i] !== 0) {
+
+        if (this.level[under] === 0 && this.level[under] !== undefined) {
+          this.moveCandy(i, lignePosition, colPosition, under);
         }
+
+        break;
+
+      }else if (this.level[i] === 0) {
+        this.createNewRandomCandy(colPosition);
+      }else if (this.level[i] !== 0) {
+        counter++;
       }
     }
+
+    if (this.level.length === counter) {
+
+      this.fillEnd = true;
+      return setTimeout($.proxy(this.checkLines, this), 50);
+    }else {
+      return setTimeout($.proxy(this.fillHoles, this), 50);
+    }
+  };
+
+  this.scoreUpdate = function(score) {
+    this.score = Math.floor(this.score + score / 10);
+    $('#score').text(this.score);
+  };
+
+  this.moveUpdate = function(move) {
+    if (moveUpdate = true) {
+
+
+    }else {
+      this.move = 0;
+    }
+
   }
+
+  $(function () {
+    var seconds = 59;
+    var minutes = 1;
+    var final = 0;
+
+
+    setInterval(function () {
+
+      $("#minutos").text("0"+minutes+ ":" + seconds);
+      seconds--;
+
+
+      if (seconds <= -1) {
+        minutes = 0;
+        seconds = 59;
+        final++;
+        $("#minutos").text("0"+minutes+ ":" + seconds);
+      }
+
+      if (seconds <= 9) {
+        $("#minutos").text("0"+minutes+ ":" + "0" + seconds);
+      }
+
+      if (final >= 2) {
+
+        console.log("hola");
+        seconds = 0;
+
+        $("#tablero").hide("slow");
+        $("#minutos").text("0"+minutes+ ":" + "0" + seconds);
+        $(".panel-score").css({
+          "width": "100%",
+        });
+        $(".fin").show();
+
+      }
+    }, 500);
+  })
 }
-
-function _executeDestroy()
-             { console.log("hehehehe");
-                  for (var r=0;r<rows-1;r++)
-                      for (var c=0;c<cols-1;c++)
-                          if (grid[r][c].isInCombo)
-                          {
-                              grid[r][c].o.animate({
-                                  opacity:0
-                              },500);
-                          }
-
-                 $(":animated").promise().done(function() {
-                      _executeDestroyMemory();
-                });
-             }
-
-             function _executeDestroyMemory() {
-
-                  for (var r=0;r<rows-1;r++)
-                  {
-                      for (var c=0;c<cols-1;c++)
-                      {
-                          if (grid[r][c].isInCombo)
-                          {
-                              grid[r][c].o.attr("src","")
-
-                              grid[r][c].isInCombo=false;
-
-                              for (var sr=r;sr>=0;sr--)
-                              {
-                                  if (sr==0) break;
-                                  if (grid[sr-1][c].locked)
-                                      break; // cannot shift. my top is locked
-
-                                      // shift cell
-                                      var tmp = grid[sr][c].src;
-                                        grid[sr][c].src=grid[sr-1][c].src;
-                                    grid[sr-1][c].src=tmp;
-
-                              }
-                          }
-                      }
-                 }
-
-                     console.log("End of movement");
-
-                       //redrawing the grid
-                       // and setup respaw
-
-                       //Reset all cell
-                    for (var r=0;r<rows-1;r++)
-                     {    for (var c = 0;c<cols-1;c++)
-                         {
-                             grid[r][c].o.attr("src",grid[r][c].src);
-                             grid[r][c].o.css("opacity","1");
-                             grid[r][c].isInCombo=false;
-                             if (grid[r][c].src==null)
-                                 grid[r][c].respawn=true;
-                              // if respawn is needed
-                              if (grid[r][c].respawn==true)
-                             {
-                                 grid[r][c].o.off("ondragover");
-                                 grid[r][c].o.off("ondrop");
-                                 grid[r][c].o.off("ondragstart");
-
-                                 grid[r][c].respawn=false; // respawned!
-                                 console.log("Respawning " + r+ "," + c);
-                                 grid[r][c].src=pickRandomCandy();
-                                 grid[r][c].locked=false;
-                                 grid[r][c].o.attr("src",grid[r][c].src);
-                                 grid[r][c].o.attr("ondragstart","_ondragstart(event)");
-                                 grid[r][c].o.attr("ondrop","_onDrop(event)");
-                                 grid[r][c].o.attr("ondragover","_onDragOverEnabled(event)");
-
-                             }
-                         }
-                     }
-
-                     console.log("jewels resetted and rewpawned");
-
-                     // check for other valid figures
-                     _checkAndDestroy();
-             }
